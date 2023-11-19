@@ -4,12 +4,13 @@ const { check } = require('express-validator');
 //!Importar controller data
 const { dataPost, dataGet, probabilidadTemperature, dataGrafic, dataEmit } = require('../controllers/data.controller');
 const { validarCampos } = require('../middlewares/validar-campos');
+const { validarJWT } = require( '../middlewares/validar-jwt');
 
 
 const router = Router();
 
 
-router.get('/', dataGet);
+router.get('/',[  validarJWT], dataGet);
 
 
 router.get('/temperature', probabilidadTemperature);

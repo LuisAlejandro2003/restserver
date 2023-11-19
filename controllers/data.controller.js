@@ -1,6 +1,6 @@
 const { response, request } = require('express');
 const socketIo = require('socket.io-client');
-const socket = socketIo('http://localhost:3001'); // Reemplaza 'tu-servidor-socket' con la URL de tu servidor de sockets
+const socket = socketIo('http://localhost:3000'); // Reemplaza 'tu-servidor-socket' con la URL de tu servidor de sockets
 const { format, isToday } = require('date-fns');
 const Data = require('../models/data.model');
 
@@ -19,21 +19,31 @@ const dataPost = async (req, res) => {
 
 }
 
-const dataGet = async (req = request, res = response) => {
+const dataGet = async (req, res) => {
     try {
-        const datas = await Data.find();
-        const total = datas.length;
 
-        res.json({
-            total,
-            datas
-        });
+        
+        const payload = req.usuario;
+        const userId = payload._id;
+        // Obtener datos de la base de datos filtrados por el userId
+        const datas = await Data.find({ idUser: userId });
+  
+      // Ordenar los datos por fecha de forma descendente
+      const datasOrdenados = datas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  
+      // Calcular el total después de ordenar
+      const total = datasOrdenados.length;
+  
+      res.json({
+        total,
+        datas: datasOrdenados,
+      });
     } catch (error) {
-        console.error('Error al obtener datos:', error);
-        res.status(500).json({ error: 'Error al obtener datos' });
+      console.error('Error al obtener datos:', error);
+      res.status(500).json({ error: 'Error al obtener datos' });
     }
-};
-
+  };
+  
 
 const dataEmit = async ( req = request, res = response) => {
  
@@ -45,7 +55,7 @@ const dataEmit = async ( req = request, res = response) => {
 
         res.json({ message: 'Datos recibidos y emitidos al cliente correctamente' });
 
- 
+
 }
 
 
