@@ -96,36 +96,34 @@ const probabilidadTemperature = async (req = request, res = response) => {
     try {
         const userId = req.usuario._id;
 
-        // Ordena los datos por fecha y hora de manera descendente y toma los últimos 12
-        const datas = await Data.find({ idUser: userId }).sort({ fecha: -1 }).limit(12);
+    
+        const datas = await Data.find({ idUser: userId }).sort({ fecha: 1 }).limit(12);
 
-        // Filtra las temperaturas mayores a 35 grados
+        
         const mayores35Temperatura = datas.filter((dato) => dato.temperatura > 35);
 
-        // Filtra las temperaturas menores a 25 grados
         const menores25Temperatura = datas.filter((dato) => dato.temperatura < 25);
 
-        // Calcula las probabilidades de temperatura
+       
         const probabilidadMayor35Temperatura = (mayores35Temperatura.length / 12) * 100;
         const probabilidadMenor25Temperatura = (menores25Temperatura.length / 12) * 100;
 
-        // Filtra las humedades mayores a 40%
+        
         const mayores40Humedad = datas.filter((dato) => dato.humedad > 75);
 
-        // Filtra las humedades menores a 30%
+        
         const menores30Humedad = datas.filter((dato) => dato.humedad < 55);
 
-        // Calcula las probabilidades de humedad
         const probabilidadMayor40Humedad = (mayores40Humedad.length / 12) * 100;
         const probabilidadMenor30Humedad = (menores30Humedad.length / 12) * 100;
 
-        // Filtra los luxes mayores a 300
+    
         const mayores300Luxes = datas.filter((dato) => dato.luxes > 300);
 
-        // Filtra los luxes menores a 100
+
         const menores100Luxes = datas.filter((dato) => dato.luxes < 100);
 
-        // Calcula las probabilidades de luxes
+    
         const probabilidadMayor300Luxes = (mayores300Luxes.length / 12) * 100;
         const probabilidadMenor100Luxes = (menores100Luxes.length / 12) * 100;
 
@@ -151,12 +149,12 @@ const mediaUltimos30Dias = async (req, res) => {
         // Obtener el userId del payload del token
         const userId = req.usuario._id;
 
-        // Obtener datos de la base de datos ordenados por fecha de forma descendente y limitados a los últimos 30
+
         const datas = await Data.find({ idUser: userId })
             .sort({ fecha: -1 })
             .limit(30);
 
-        // Verificar si hay datos
+        
         if (datas.length === 0) {
             return res.json({
                 mediaTemperatura: null,
@@ -165,7 +163,7 @@ const mediaUltimos30Dias = async (req, res) => {
             });
         }
 
-        // Calcular la media de temperatura, humedad y luxes
+    
         const mediaTemperatura = datas.reduce((acc, dato) => acc + parseFloat(dato.temperatura), 0) / datas.length;
         const mediaHumedad = datas.reduce((acc, dato) => acc + parseFloat(dato.humedad), 0) / datas.length;
         const mediaLuxes = datas.reduce((acc, dato) => acc + parseFloat(dato.luxes), 0) / datas.length;
