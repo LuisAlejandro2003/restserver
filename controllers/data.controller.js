@@ -22,38 +22,38 @@ const dataPost = async (req, res) => {
 const dataGet = async (req, res) => {
     try {
 
-        
+
         const payload = req.usuario;
         const userId = payload._id;
         // Obtener datos de la base de datos filtrados por el userId
         const datas = await Data.find({ idUser: userId });
-  
-      // Ordenar los datos por fecha de forma descendente
-      const datasOrdenados = datas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-  
-      // Calcular el total después de ordenar
-      const total = datasOrdenados.length;
-  
-      res.json({
-        total,
-        datas: datasOrdenados,
-      });
+
+        // Ordenar los datos por fecha de forma descendente
+        const datasOrdenados = datas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        // Calcular el total después de ordenar
+        const total = datasOrdenados.length;
+
+        res.json({
+            total,
+            datas: datasOrdenados,
+        });
     } catch (error) {
-      console.error('Error al obtener datos:', error);
-      res.status(500).json({ error: 'Error al obtener datos' });
+        console.error('Error al obtener datos:', error);
+        res.status(500).json({ error: 'Error al obtener datos' });
     }
-  };
-  
+};
 
-const dataEmit = async ( req = request, res = response) => {
- 
-        const { idUser, temperatura, humedad, luxes, hora } = req.body;
-        const data = { idUser, temperatura, humedad, luxes, hora };
 
-        // Emite los datos al evento 'nuevos-datos' del servidor socket
-        socket.emit('nuevos-datos', data);
+const dataEmit = async (req = request, res = response) => {
 
-        res.json({ message: 'Datos recibidos y emitidos al cliente correctamente' });
+    const { idUser, temperatura, humedad, luxes, hora } = req.body;
+    const data = { idUser, temperatura, humedad, luxes, hora };
+
+    // Emite los datos al evento 'nuevos-datos' del servidor socket
+    socket.emit('nuevos-datos', data);
+
+    res.json({ message: 'Datos recibidos y emitidos al cliente correctamente' });
 
 
 }
@@ -61,11 +61,17 @@ const dataEmit = async ( req = request, res = response) => {
 
 const dataGrafic = async (req, res) => {
     try {
+        // Obtener el payload del token desde req.usuario
+        const payload = req.usuario;
+
+        // Extraer el userId del payload
+        const userId = payload._id; // Asumiendo que el id del usuario está en la propiedad _id
+
         // Obtén la fecha actual en el formato de tu campo de fecha
         const currentDate = format(new Date(), "EEE MMM dd yyyy HH:mm:ss 'GMT'xx (zzz)");
 
-        // Obtiene los datos de la base de datos
-        const allData = await Data.find();
+        // Obtiene los datos de la base de datos filtrados por el userId
+        const allData = await Data.find({ idUser: userId });
 
         // Filtra los datos por la fecha actual
         const datas = allData.filter(data => isToday(new Date(data.fecha)));
@@ -86,9 +92,12 @@ const dataGrafic = async (req, res) => {
 
 
 const probabilidadTemperature = async (req = request, res = response) => {
+
     try {
+        const userId = req.usuario._id;
+
         // Ordena los datos por fecha y hora de manera descendente y toma los últimos 12
-        const datas = await Data.find().sort({ fecha: -1 }).limit(12);
+        const datas = await Data.find({ idUser: userId }).sort({ fecha: -1 }).limit(12);
 
         // Filtra las temperaturas mayores a 35 grados
         const mayores35Temperatura = datas.filter((dato) => dato.temperatura > 35);
@@ -101,10 +110,10 @@ const probabilidadTemperature = async (req = request, res = response) => {
         const probabilidadMenor25Temperatura = (menores25Temperatura.length / 12) * 100;
 
         // Filtra las humedades mayores a 40%
-        const mayores40Humedad = datas.filter((dato) => dato.humedad > 40);
+        const mayores40Humedad = datas.filter((dato) => dato.humedad > 75);
 
         // Filtra las humedades menores a 30%
-        const menores30Humedad = datas.filter((dato) => dato.humedad < 30);
+        const menores30Humedad = datas.filter((dato) => dato.humedad < 55);
 
         // Calcula las probabilidades de humedad
         const probabilidadMayor40Humedad = (mayores40Humedad.length / 12) * 100;
@@ -137,7 +146,45 @@ const probabilidadTemperature = async (req = request, res = response) => {
 
 
 
+const mediaUltimos30Dias = async (req, res) => {
+    try {
+        // Obtener el userId del payload del token
+        const userId = req.usuario._id;
+
+        // Obtener datos de la base de datos ordenados por fecha de forma descendente y limitados a los últimos 30
+        const datas = await Data.find({ idUser: userId })
+            .sort({ fecha: -1 })
+            .limit(30);
+
+        // Verificar si hay datos
+        if (datas.length === 0) {
+            return res.json({
+                mediaTemperatura: null,
+                mediaHumedad: null,
+                mediaLuxes: null,
+            });
+        }
+
+        // Calcular la media de temperatura, humedad y luxes
+        const mediaTemperatura = datas.reduce((acc, dato) => acc + parseFloat(dato.temperatura), 0) / datas.length;
+        const mediaHumedad = datas.reduce((acc, dato) => acc + parseFloat(dato.humedad), 0) / datas.length;
+        const mediaLuxes = datas.reduce((acc, dato) => acc + parseFloat(dato.luxes), 0) / datas.length;
+
+        res.json({
+            mediaTemperatura,
+            mediaHumedad,
+            mediaLuxes,
+        });
+    } catch (error) {
+        console.error('Error al calcular la media:', error);
+        res.status(500).json({ error: 'Error al calcular la media' });
+    }
+};
+
+
+
+
 
 module.exports = {
-    dataPost, dataGet, probabilidadTemperature, dataGrafic , dataEmit
+    dataPost, dataGet, probabilidadTemperature, dataGrafic, dataEmit, mediaUltimos30Dias
 }

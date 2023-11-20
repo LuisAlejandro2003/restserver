@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 
 //!Importar controller data
-const { dataPost, dataGet, probabilidadTemperature, dataGrafic, dataEmit } = require('../controllers/data.controller');
+const { dataPost, dataGet, probabilidadTemperature, dataGrafic, dataEmit , mediaUltimos30Dias} = require('../controllers/data.controller');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { validarJWT } = require( '../middlewares/validar-jwt');
 
@@ -10,14 +10,15 @@ const { validarJWT } = require( '../middlewares/validar-jwt');
 const router = Router();
 
 
-router.get('/',[  validarJWT], dataGet);
+router.get('/',[validarJWT], dataGet);
 
 
-router.get('/temperature', probabilidadTemperature);
-router.get('/grafic', dataGrafic);
+router.get('/temperature',[validarJWT], probabilidadTemperature);
+router.get('/grafic',[validarJWT], dataGrafic);
+router.get('/media', [validarJWT], mediaUltimos30Dias);
+
+
 router.post('/emit', dataEmit);
-
-
 
 router.post('/', [
     check('temperatura', 'La temperatura es obligatoria').not().isEmpty(),
