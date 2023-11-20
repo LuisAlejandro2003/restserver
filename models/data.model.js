@@ -7,6 +7,12 @@ const DataSchema = Schema({
         required: [true, 'El id del usuario es obligatorio'],
     },
 
+    fecha: {
+        type: String,
+        
+    },
+
+
     temperatura: {
         type: String,
         required: [true, 'La temperatura es obligatoria']
@@ -15,7 +21,6 @@ const DataSchema = Schema({
     humedad: {
         type: String,
         required: [true, 'La humedad es obligatoria'],
-       
     },
 
     luxes: {
