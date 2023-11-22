@@ -1,6 +1,6 @@
 const { response, request } = require('express');
 const socketIo = require('socket.io-client');
-const socket = socketIo('http://localhost:3000'); // Reemplaza 'tu-servidor-socket' con la URL de tu servidor de sockets
+const socket = socketIo('http://socket2023.creativesolution.com.mx:3000'); // Reemplaza 'tu-servidor-socket' con la URL de tu servidor de sockets
 const { format, isToday } = require('date-fns');
 const Data = require('../models/data.model');
 
