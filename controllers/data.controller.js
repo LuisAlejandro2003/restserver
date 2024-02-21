@@ -1,6 +1,6 @@
 const { response, request } = require('express');
 const socketIo = require('socket.io-client');
-const socket = socketIo('http://3.85.226.160:3000'); 
+const socket = socketIo('http://54.221.24.143:3000'); 
 const { format, isToday } = require('date-fns');
 const Data = require('../models/data.model');
 
