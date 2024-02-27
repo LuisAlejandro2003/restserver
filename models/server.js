@@ -14,13 +14,10 @@ class Server {
         this.dataPath = '/api/data'
 
 
-        //conectar a la base de datos 
         this.conectarDB();
-        //middlewares
         this.middlewares();
 
 
-        //rutas
         this.routes();
     }
 
@@ -30,11 +27,8 @@ class Server {
 
     middlewares() {
 
-        //CORS
         this.app.use(cors());
-        //lectura y parseo del body
         this.app.use(express.json())
-        //directorio public
         this.app.use(express.static('public'))
     }
 

@@ -7,7 +7,6 @@ const Data = require('../models/data.model');
 const dataPost = async (req, res) => {
     const { idUser, temperatura, humedad, luxes, hora } = req.body;
     const fechaActual = new Date();
-    // Formatear la fecha
     const fechaFormateada = fechaActual.toDateString();
     const data = new Data({ idUser, temperatura, humedad, luxes, hora, fecha: fechaActual });
 
@@ -25,13 +24,10 @@ const dataGet = async (req, res) => {
 
         const payload = req.usuario;
         const userId = payload._id;
-        // Obtener datos de la base de datos filtrados por el userId
         const datas = await Data.find({ idUser: userId });
 
-        // Ordenar los datos por fecha de forma descendente
         const datasOrdenados = datas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-        // Calcular el total después de ordenar
         const total = datasOrdenados.length;
 
         res.json({
@@ -50,7 +46,6 @@ const dataEmit = async (req = request, res = response) => {
     const { idUser, temperatura, humedad, luxes, hora } = req.body;
     const data = { idUser, temperatura, humedad, luxes, hora };
 
-    // Emite los datos al evento 'nuevos-datos' del servidor socket
     socket.emit('nuevos-datos', data);
 
     res.json({ message: 'Datos recibidos y emitidos al cliente correctamente' });
@@ -61,19 +56,17 @@ const dataEmit = async (req = request, res = response) => {
 
 const dataGrafic = async (req, res) => {
     try {
-        // Obtener el payload del token desde req.usuario
         const payload = req.usuario;
 
-        // Extraer el userId del payload
-        const userId = payload._id; // Asumiendo que el id del usuario está en la propiedad _id
+        const userId = payload._id; 
 
-        // Obtén la fecha actual en el formato de tu campo de fecha
+       
         const currentDate = format(new Date(), "EEE MMM dd yyyy HH:mm:ss 'GMT'xx (zzz)");
 
-        // Obtiene los datos de la base de datos filtrados por el userId
+       
         const allData = await Data.find({ idUser: userId });
 
-        // Filtra los datos por la fecha actual
+    
         const datas = allData.filter(data => isToday(new Date(data.fecha)));
 
         const total = datas.length;
@@ -146,7 +139,7 @@ const probabilidadTemperature = async (req = request, res = response) => {
 
 const mediaUltimos30Dias = async (req, res) => {
     try {
-        // Obtener el userId del payload del token
+      
         const userId = req.usuario._id;
 
 
